@@ -1,0 +1,120 @@
+<script lang="ts">
+  import CalendarView from './components/calendar/CalendarView.svelte'
+  import AllHabitsView from './components/habits/AllHabitsView.svelte'
+  import HabitForm from './components/habits/HabitForm.svelte'
+  import HabitList from './components/habits/HabitList.svelte'
+  import Header from './components/layout/Header.svelte'
+  import Navigation from './components/layout/Navigation.svelte'
+  import StatsView from './components/stats/StatsView.svelte'
+  import {
+    habitStore,
+    markNotified,
+    resetDailyReminders,
+  } from './stores/habitStore.svelte'
+  import type { Habit, View } from './types'
+  import { getToday } from './utils/date'
+  import { getPermissionStatus, requestPermission, showNotification } from './utils/notifications'
+
+  let activeView = $state<View>('today')
+  let showForm = $state(false)
+  let editingHabit = $state<Habit | null>(null)
+  let lastReminderDate = getToday()
+
+  $effect(() => {
+    document.documentElement.classList.toggle('dark', habitStore.theme === 'dark')
+  })
+
+  $effect(() => {
+    if (!('serviceWorker' in navigator)) return
+    navigator.serviceWorker.register('/sw.js').catch(() => undefined)
+  })
+
+  $effect(() => {
+    const hasAnyReminder = habitStore.habits.some((habit) => habit.reminderEnabled && !habit.archived)
+    if (hasAnyReminder && getPermissionStatus() === 'default') {
+      requestPermission()
+    }
+  })
+
+  $effect(() => {
+    function checkReminders(): void {
+      const now = new Date()
+      const todayKey = getToday()
+      const dayOfWeek = now.getDay()
+      const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(
+        now.getMinutes(),
+      ).padStart(2, '0')}`
+
+      if (lastReminderDate !== todayKey) {
+        resetDailyReminders(todayKey)
+        lastReminderDate = todayKey
+      }
+
+      for (const habit of habitStore.habits) {
+        if (habit.archived) continue
+        if (!habit.reminderEnabled) continue
+        if (!habit.targetDays.includes(dayOfWeek)) continue
+        if (habitStore.completions[todayKey]?.includes(habit.id)) continue
+        if (currentTime < habit.reminderTime) continue
+        if (habitStore.notifiedToday[todayKey]?.includes(habit.id)) continue
+
+        showNotification(
+          `${habit.emoji} ${habit.name}`,
+          habit.description || 'Time to work on your habit!',
+          `habit-${habit.id}-${todayKey}`,
+        )
+        markNotified(habit.id, todayKey)
+      }
+    }
+
+    checkReminders()
+    const interval = window.setInterval(checkReminders, 30_000)
+
+    function handleVisibilityChange(): void {
+      if (document.visibilityState === 'visible') checkReminders()
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    return () => {
+      window.clearInterval(interval)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  })
+
+  function handleAddHabit(): void {
+    editingHabit = null
+    showForm = true
+  }
+
+  function handleEditHabit(habit: Habit): void {
+    editingHabit = habit
+    showForm = true
+  }
+
+  function handleCloseForm(): void {
+    showForm = false
+    editingHabit = null
+  }
+</script>
+
+<div class="min-h-screen bg-gray-50 text-gray-900 transition-colors duration-200 dark:bg-slate-950 dark:text-white">
+  <div class="mx-auto flex min-h-screen max-w-2xl flex-col px-4 pb-24 sm:pb-8">
+    <Header onAddHabit={handleAddHabit} />
+    <Navigation {activeView} onViewChange={(view) => (activeView = view)} />
+
+    <main class="flex-1">
+      {#if activeView === 'today'}
+        <HabitList onEditHabit={handleEditHabit} onAddHabit={handleAddHabit} />
+      {:else if activeView === 'calendar'}
+        <CalendarView onEditHabit={handleEditHabit} />
+      {:else if activeView === 'stats'}
+        <StatsView />
+      {:else if activeView === 'habits'}
+        <AllHabitsView onEditHabit={handleEditHabit} />
+      {/if}
+    </main>
+  </div>
+
+  <HabitForm open={showForm} onClose={handleCloseForm} {editingHabit} />
+</div>
