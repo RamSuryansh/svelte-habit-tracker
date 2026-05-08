@@ -116,5 +116,7 @@
     </main>
   </div>
 
-  <HabitForm open={showForm} onClose={handleCloseForm} {editingHabit} />
+  {#if showForm}
+    <HabitForm open={showForm} onClose={handleCloseForm} {editingHabit} />
+  {/if}
 </div>

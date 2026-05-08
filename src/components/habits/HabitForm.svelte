@@ -5,6 +5,7 @@
   import type { Frequency, Habit, HabitDraft } from '../../types'
   import { CATEGORIES, COLORS, DAY_LABELS, EMOJIS } from '../../utils/constants'
   import { requestPermission } from '../../utils/notifications'
+  import { untrack } from 'svelte'
 
   interface Props {
     open: boolean
@@ -25,27 +26,25 @@
   }
 
   let { open, onClose, editingHabit = null }: Props = $props()
-  let form = $state<HabitDraft>({ ...defaultForm, targetDays: [...defaultForm.targetDays] })
+  let form = $state<HabitDraft>(untrack(() => createForm(editingHabit)))
 
-  $effect(() => {
-    if (!open) return
-
-    if (editingHabit) {
-      form = {
-        name: editingHabit.name,
-        description: editingHabit.description,
-        emoji: editingHabit.emoji,
-        color: editingHabit.color,
-        category: editingHabit.category,
-        frequency: editingHabit.frequency,
-        targetDays: [...editingHabit.targetDays],
-        reminderEnabled: editingHabit.reminderEnabled,
-        reminderTime: editingHabit.reminderTime,
-      }
-    } else {
-      form = { ...defaultForm, targetDays: [...defaultForm.targetDays] }
+  function createForm(habit: Habit | null): HabitDraft {
+    if (!habit) {
+      return { ...defaultForm, targetDays: [...defaultForm.targetDays] }
     }
-  })
+
+    return {
+      name: habit.name,
+      description: habit.description,
+      emoji: habit.emoji,
+      color: habit.color,
+      category: habit.category,
+      frequency: habit.frequency,
+      targetDays: [...habit.targetDays],
+      reminderEnabled: habit.reminderEnabled,
+      reminderTime: habit.reminderTime,
+    }
+  }
 
   function handleSubmit(event: SubmitEvent): void {
     event.preventDefault()
