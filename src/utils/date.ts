@@ -9,6 +9,7 @@ import {
   format,
   isSameDay,
   isToday as isDateToday,
+  isValid,
   max as maxDate,
   min as minDate,
   parseISO,
@@ -23,6 +24,26 @@ export function getDateKey(date: Date): string {
 
 export function getToday(): string {
   return getDateKey(new Date())
+}
+
+export function isValidDateKey(dateKey: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateKey)) return false
+
+  const date = parseISO(dateKey)
+  return isValid(date) && getDateKey(date) === dateKey
+}
+
+export function isFutureDateKey(dateKey: string): boolean {
+  return isValidDateKey(dateKey) && dateKey > getToday()
+}
+
+export function canCompleteDateKey(dateKey: string): boolean {
+  return isValidDateKey(dateKey) && !isFutureDateKey(dateKey)
+}
+
+export function getDateKeyDay(dateKey: string): number | null {
+  if (!isValidDateKey(dateKey)) return null
+  return parseISO(dateKey).getDay()
 }
 
 export function formatDate(date: Date, pattern = 'MMM d, yyyy'): string {

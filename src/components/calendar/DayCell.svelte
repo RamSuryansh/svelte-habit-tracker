@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { isToday } from '../../utils/date'
+  import { getDateKey, isFutureDateKey, isToday } from '../../utils/date'
   import { isSameMonth } from 'date-fns'
 
   interface Props {
@@ -14,6 +14,7 @@
   let { date, currentMonth, onSelect, selected, completedCount, total }: Props = $props()
   let inMonth = $derived(isSameMonth(date, currentMonth))
   let today = $derived(isToday(date))
+  let future = $derived(isFutureDateKey(getDateKey(date)))
   let ratio = $derived(total > 0 ? completedCount / total : -1)
   let bgClass = $derived(
     ratio === 1
@@ -35,7 +36,9 @@
       ? 'text-gray-300 dark:text-slate-700'
       : today
         ? 'font-bold text-indigo-600 dark:text-indigo-400'
-        : 'text-gray-700 dark:text-gray-300',
+        : future
+          ? 'text-gray-400 dark:text-slate-600'
+          : 'text-gray-700 dark:text-gray-300',
     selected ? 'ring-2 ring-indigo-500 ring-offset-2 ring-offset-white dark:ring-offset-slate-900' : '',
     inMonth ? bgClass : '',
   ]}

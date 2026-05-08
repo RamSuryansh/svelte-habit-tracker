@@ -6,7 +6,7 @@
     toggleCompletion,
   } from '../../stores/habitStore.svelte'
   import type { Habit } from '../../types'
-  import { formatTime, getToday } from '../../utils/date'
+  import { canCompleteDateKey, formatTime, getToday } from '../../utils/date'
   import { Archive, Check, Clock, Flame, MoreHorizontal, Pencil, Trash2 } from 'lucide-svelte'
 
   interface Props {
@@ -19,6 +19,7 @@
   let { habit, date, streak = 0, onEdit }: Props = $props()
   let showMenu = $state(false)
   let dateKey = $derived(date ?? getToday())
+  let canComplete = $derived(canCompleteDateKey(dateKey))
   let isCompleted = $derived(habitStore.completions[dateKey]?.includes(habit.id) ?? false)
 </script>
 
@@ -28,18 +29,26 @@
     isCompleted
       ? 'border-gray-200 bg-gray-50 dark:border-slate-700/50 dark:bg-slate-800/50'
       : 'border-gray-200 bg-white hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:hover:shadow-slate-950/50',
+    canComplete ? '' : 'opacity-60',
   ]}
 >
   <button
     type="button"
     onclick={() => toggleCompletion(habit.id, dateKey)}
-    class="shrink-0 cursor-pointer"
-    aria-label={isCompleted ? `Mark ${habit.name} incomplete` : `Complete ${habit.name}`}
+    disabled={!canComplete}
+    class={['shrink-0', canComplete ? 'cursor-pointer' : 'cursor-not-allowed']}
+    aria-label={
+      canComplete
+        ? isCompleted
+          ? `Mark ${habit.name} incomplete`
+          : `Complete ${habit.name}`
+        : `${habit.name} cannot be completed for a future date`
+    }
   >
     <div
       class={[
         'flex h-11 w-11 items-center justify-center rounded-xl transition-all duration-200',
-        isCompleted ? 'scale-95' : 'hover:scale-105',
+        isCompleted ? 'scale-95' : canComplete ? 'hover:scale-105' : '',
       ]}
       style={`background-color: ${isCompleted ? habit.color : `${habit.color}15`}; border: ${
         isCompleted ? '0' : `2px solid ${habit.color}40`

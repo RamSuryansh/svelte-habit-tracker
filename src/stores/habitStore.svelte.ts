@@ -1,4 +1,5 @@
 import type { Completions, Habit, HabitDraft, HabitState, HabitUpdates, Theme, TimeFormat } from '../types'
+import { canCompleteDateKey, getDateKeyDay } from '../utils/date'
 
 const STORAGE_KEY = 'habit-tracker-storage'
 
@@ -18,17 +19,32 @@ function loadState(): HabitState {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return structuredClone(initialState)
     const saved = JSON.parse(raw) as Partial<HabitState>
+    const habits = saved.habits ?? []
     return {
       ...structuredClone(initialState),
       ...saved,
-      habits: saved.habits ?? [],
-      completions: saved.completions ?? {},
+      habits,
+      completions: sanitizeCompletions(saved.completions ?? {}, habits),
       notifiedToday: saved.notifiedToday ?? {},
       dismissedReminders: saved.dismissedReminders ?? [],
     }
   } catch {
     return structuredClone(initialState)
   }
+}
+
+function sanitizeCompletions(completions: Completions, habits: Habit[]): Completions {
+  const habitIds = new Set(habits.map((habit) => habit.id))
+
+  return Object.fromEntries(
+    Object.entries(completions).flatMap(([date, ids]) => {
+      if (!canCompleteDateKey(date)) return []
+
+      const completionIds = Array.isArray(ids) ? ids.filter((id) => typeof id === 'string') : []
+      const validIds = [...new Set(completionIds)].filter((id) => habitIds.has(id))
+      return validIds.length > 0 ? [[date, validIds]] : []
+    }),
+  )
 }
 
 export const habitStore = $state<HabitState>(loadState())
@@ -89,13 +105,27 @@ export function unarchiveHabit(id: string): void {
 }
 
 export function toggleCompletion(habitId: string, date: string): void {
+  if (!canCompleteDateKey(date)) return
+
   const dayCompletions = habitStore.completions[date] ?? []
   const isCompleted = dayCompletions.includes(habitId)
+  const habit = habitStore.habits.find((item) => item.id === habitId)
+
+  if (!isCompleted) {
+    const dayOfWeek = getDateKeyDay(date)
+    if (!habit || habit.archived || dayOfWeek == null || !habit.targetDays.includes(dayOfWeek)) {
+      return
+    }
+  }
+
+  const nextDayCompletions = isCompleted
+    ? dayCompletions.filter((id) => id !== habitId)
+    : [...dayCompletions, habitId]
+
+  const { [date]: _removed, ...otherCompletions } = habitStore.completions
   habitStore.completions = {
-    ...habitStore.completions,
-    [date]: isCompleted
-      ? dayCompletions.filter((id) => id !== habitId)
-      : [...dayCompletions, habitId],
+    ...otherCompletions,
+    ...(nextDayCompletions.length > 0 ? { [date]: nextDayCompletions } : {}),
   }
   persist()
 }
