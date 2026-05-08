@@ -65,6 +65,7 @@ html {
   min-width: 320px;
   min-height: 100%;
   background: #f9fafb;
+  scroll-behavior: smooth;
 }
 
 html.dark {
@@ -75,11 +76,25 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  min-height: 100svh;
+  overscroll-behavior-y: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#app {
+  min-height: 100svh;
 }
 
 button,
-input {
+input,
+select,
+textarea {
   font: inherit;
+}
+
+button,
+a {
+  touch-action: manipulation;
 }
 
 button:focus-visible,

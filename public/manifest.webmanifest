@@ -1,0 +1,19 @@
+{
+  "name": "Habit Tracker",
+  "short_name": "Habits",
+  "description": "A focused mobile habit tracker for daily routines, reminders, and progress.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#4f46e5",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

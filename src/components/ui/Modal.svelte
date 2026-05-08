@@ -18,18 +18,29 @@
   function handleOverlayClick(event: MouseEvent): void {
     if (event.target === event.currentTarget) onClose()
   }
+
+  $effect(() => {
+    if (!open) return
+
+    const originalOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+
+    return () => {
+      document.body.style.overflow = originalOverflow
+    }
+  })
 </script>
 
 <svelte:document onkeydown={handleKeydown} />
 
 {#if open}
   <div
-    class="fixed inset-0 z-50 flex animate-[fadeIn_150ms_ease-out] items-end justify-center bg-black/50 p-4 backdrop-blur-sm sm:items-center"
+    class="fixed inset-0 z-50 flex animate-[fadeIn_150ms_ease-out] items-end justify-center bg-black/50 p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-[calc(env(safe-area-inset-top)+1rem)] backdrop-blur-sm sm:items-center"
     onclick={handleOverlayClick}
     role="presentation"
   >
     <div
-      class="w-full max-w-lg animate-[slideUp_200ms_ease-out] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-800"
+      class="max-h-[calc(100svh-env(safe-area-inset-top)-env(safe-area-inset-bottom)-2rem)] w-full max-w-lg animate-[slideUp_200ms_ease-out] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-800"
       aria-modal="true"
       role="dialog"
       aria-labelledby="modal-title"
@@ -49,7 +60,7 @@
           <X size={20} />
         </button>
       </div>
-      <div class="max-h-[calc(85vh-65px)] overflow-y-auto p-6">
+      <div class="max-h-[calc(100svh-env(safe-area-inset-top)-env(safe-area-inset-bottom)-6.25rem)] overflow-y-auto p-6">
         {@render children?.()}
       </div>
     </div>

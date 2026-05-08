@@ -21,7 +21,9 @@
   )
 </script>
 
-<header class="flex items-center justify-between gap-4 py-4">
+<header
+  class="sticky top-0 z-30 -mx-4 flex items-center justify-between gap-4 bg-gray-50/90 px-4 py-4 backdrop-blur-xl dark:bg-slate-950/90"
+>
   <div class="min-w-0">
     <h1 class="text-2xl font-bold tracking-tight text-gray-950 dark:text-white">Habit Tracker</h1>
     <p class="mt-0.5 text-sm text-gray-500 dark:text-slate-400">{todayLabel}</p>

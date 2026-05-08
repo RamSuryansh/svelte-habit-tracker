@@ -15,10 +15,54 @@
   import { getToday } from './utils/date'
   import { getPermissionStatus, requestPermission, showNotification } from './utils/notifications'
 
-  let activeView = $state<View>('today')
+  const VIEW_ROUTES = {
+    today: '/',
+    calendar: '/calendar',
+    stats: '/stats',
+    habits: '/habits',
+  } satisfies Record<View, string>
+
+  const ROUTE_VIEWS: Record<string, View> = {
+    '/': 'today',
+    '/today': 'today',
+    '/calendar': 'calendar',
+    '/stats': 'stats',
+    '/habits': 'habits',
+  }
+
+  const VIEW_TITLES = {
+    today: 'Today',
+    calendar: 'Calendar',
+    stats: 'Stats',
+    habits: 'Habits',
+  } satisfies Record<View, string>
+
+  function normalizePath(pathname: string): string {
+    const path = pathname.replace(/\/+$/, '')
+    return path || '/'
+  }
+
+  function viewFromPath(pathname: string): View {
+    return ROUTE_VIEWS[normalizePath(pathname)] ?? 'today'
+  }
+
+  let activeView = $state<View>(viewFromPath(window.location.pathname))
   let showForm = $state(false)
   let editingHabit = $state<Habit | null>(null)
   let lastReminderDate = getToday()
+
+  $effect(() => {
+    const currentPath = normalizePath(window.location.pathname)
+    const canonicalPath = VIEW_ROUTES[activeView]
+    if (currentPath !== canonicalPath) {
+      window.history.replaceState({ view: activeView }, '', canonicalPath)
+    }
+  })
+
+  $effect(() => {
+    const title = VIEW_TITLES[activeView]
+    document.title = title === 'Today' ? 'Habit Tracker' : `${title} | Habit Tracker`
+  })
 
   $effect(() => {
     document.documentElement.classList.toggle('dark', habitStore.theme === 'dark')
@@ -96,12 +140,30 @@
     showForm = false
     editingHabit = null
   }
+
+  function navigateToView(view: View): void {
+    const nextPath = VIEW_ROUTES[view]
+    if (normalizePath(window.location.pathname) !== nextPath) {
+      window.history.pushState({ view }, '', nextPath)
+    }
+    activeView = view
+  }
+
+  function handlePopState(): void {
+    activeView = viewFromPath(window.location.pathname)
+  }
 </script>
 
-<div class="min-h-screen bg-gray-50 text-gray-900 transition-colors duration-200 dark:bg-slate-950 dark:text-white">
-  <div class="mx-auto flex min-h-screen max-w-2xl flex-col px-4 pb-24 sm:pb-8">
+<svelte:window onpopstate={handlePopState} />
+
+<div
+  class="min-h-[100svh] bg-gray-50 text-gray-900 transition-colors duration-200 dark:bg-slate-950 dark:text-white"
+>
+  <div
+    class="mx-auto flex min-h-[100svh] max-w-2xl flex-col px-4 pb-[calc(env(safe-area-inset-bottom)+5.75rem)] pt-[env(safe-area-inset-top)] sm:pb-8"
+  >
     <Header onAddHabit={handleAddHabit} />
-    <Navigation {activeView} onViewChange={(view) => (activeView = view)} />
+    <Navigation {activeView} routes={VIEW_ROUTES} onViewChange={navigateToView} />
 
     <main class="flex-1">
       {#if activeView === 'today'}
