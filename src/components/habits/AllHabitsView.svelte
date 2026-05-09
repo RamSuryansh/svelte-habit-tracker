@@ -9,6 +9,9 @@
   } from '../../stores/habitStore.svelte'
   import type { Habit } from '../../types'
   import { DAY_LABELS } from '../../utils/constants'
+  import { flip } from 'svelte/animate'
+  import { cubicOut } from 'svelte/easing'
+  import { fade, fly } from 'svelte/transition'
   import { Archive, ArchiveRestore, ListChecks, Pencil, Trash2 } from 'lucide-svelte'
 
   type Filter = 'all' | 'active' | 'archived'
@@ -39,7 +42,7 @@
 </script>
 
 {#if habitStore.habits.length === 0}
-  <div class="flex flex-col items-center justify-center py-20 text-center">
+  <div class="flex flex-col items-center justify-center py-20 text-center" in:fade={{ duration: 160 }}>
     <div class="mb-4 flex h-20 w-20 items-center justify-center rounded-2xl bg-indigo-50 dark:bg-indigo-500/10">
       <ListChecks size={36} class="text-indigo-500" />
     </div>
@@ -68,7 +71,10 @@
     </div>
 
     {#if filtered.length === 0}
-      <div class="flex flex-col items-center justify-center py-16 text-center">
+      <div
+        class="flex flex-col items-center justify-center py-16 text-center"
+        in:fade={{ duration: 140 }}
+      >
         <p class="text-sm text-gray-500 dark:text-slate-400">
           No {filter === 'archived' ? 'archived' : 'active'} habits
         </p>
@@ -81,6 +87,9 @@
               'flex items-center gap-3 rounded-2xl border border-gray-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800',
               habit.archived ? 'opacity-60' : '',
             ]}
+            animate:flip={{ duration: 180 }}
+            in:fly={{ y: 8, duration: 170, easing: cubicOut }}
+            out:fade={{ duration: 100 }}
           >
             <div
               class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl"

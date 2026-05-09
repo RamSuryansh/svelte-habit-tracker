@@ -7,6 +7,8 @@
   } from '../../stores/habitStore.svelte'
   import type { Habit } from '../../types'
   import { canCompleteDateKey, formatTime, getToday } from '../../utils/date'
+  import { cubicOut } from 'svelte/easing'
+  import { fade, scale } from 'svelte/transition'
   import { Archive, Check, Clock, Flame, MoreHorizontal, Pencil, Trash2 } from 'lucide-svelte'
 
   interface Props {
@@ -110,6 +112,8 @@
       ></button>
       <div
         class="absolute right-0 top-full z-50 mt-1 w-40 rounded-xl border border-gray-200 bg-white py-1 shadow-xl dark:border-slate-600 dark:bg-slate-700"
+        in:scale={{ start: 0.96, duration: 130, easing: cubicOut }}
+        out:fade={{ duration: 80 }}
       >
         <button
           type="button"

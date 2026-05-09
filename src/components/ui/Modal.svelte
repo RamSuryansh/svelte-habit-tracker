@@ -1,5 +1,7 @@
 <script lang="ts">
   import type { Snippet } from 'svelte'
+  import { cubicOut } from 'svelte/easing'
+  import { fade, fly } from 'svelte/transition'
   import { X } from 'lucide-svelte'
 
   interface Props {
@@ -35,15 +37,19 @@
 
 {#if open}
   <div
-    class="fixed inset-0 z-50 flex animate-[fadeIn_150ms_ease-out] items-end justify-center bg-black/50 p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-[calc(env(safe-area-inset-top)+1rem)] backdrop-blur-sm sm:items-center"
+    class="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-[calc(env(safe-area-inset-top)+1rem)] backdrop-blur-sm sm:items-center"
     onclick={handleOverlayClick}
     role="presentation"
+    in:fade={{ duration: 140 }}
+    out:fade={{ duration: 100 }}
   >
     <div
-      class="max-h-[calc(100svh-env(safe-area-inset-top)-env(safe-area-inset-bottom)-2rem)] w-full max-w-lg animate-[slideUp_200ms_ease-out] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-800"
+      class="max-h-[calc(100svh-env(safe-area-inset-top)-env(safe-area-inset-bottom)-2rem)] w-full max-w-lg overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-800"
       aria-modal="true"
       role="dialog"
       aria-labelledby="modal-title"
+      in:fly={{ y: 18, duration: 190, easing: cubicOut }}
+      out:fly={{ y: 10, duration: 120 }}
     >
       <div
         class="sticky top-0 z-10 flex items-center justify-between border-b border-gray-200 bg-white px-6 py-4 dark:border-slate-700 dark:bg-slate-800"

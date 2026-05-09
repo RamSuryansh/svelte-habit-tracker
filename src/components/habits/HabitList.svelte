@@ -4,6 +4,9 @@
   import { getHabitsForDay, habitStore } from '../../stores/habitStore.svelte'
   import type { Habit } from '../../types'
   import { computeHabitStats } from '../../utils/stats'
+  import { flip } from 'svelte/animate'
+  import { cubicOut } from 'svelte/easing'
+  import { fade, fly } from 'svelte/transition'
   import { Target } from 'lucide-svelte'
 
   interface Props {
@@ -20,7 +23,7 @@
 </script>
 
 {#if todayHabits.length === 0}
-  <div class="flex flex-col items-center justify-center py-20 text-center">
+  <div class="flex flex-col items-center justify-center py-20 text-center" in:fade={{ duration: 160 }}>
     <div class="mb-4 flex h-20 w-20 items-center justify-center rounded-2xl bg-indigo-50 dark:bg-indigo-500/10">
       <Target size={36} class="text-indigo-500" />
     </div>
@@ -38,7 +41,10 @@
   </div>
 {:else}
   <div>
-    <div class="mb-6 flex items-center gap-5 rounded-3xl border border-indigo-100 bg-white p-4 shadow-sm dark:border-indigo-500/10 dark:bg-slate-800/70">
+    <div
+      class="mb-6 flex items-center gap-5 rounded-3xl border border-indigo-100 bg-white p-4 shadow-sm dark:border-indigo-500/10 dark:bg-slate-800/70"
+      in:fly={{ y: 8, duration: 170, easing: cubicOut }}
+    >
       <ProgressRing {progress} size={80} strokeWidth={6}>
         <div class="text-center">
           <p class="text-lg font-bold leading-none text-gray-900 dark:text-white">
@@ -65,11 +71,17 @@
 
     <div class="space-y-3">
       {#each todayHabits as habit (habit.id)}
-        <HabitCard
-          {habit}
-          streak={perHabitMap.get(habit.id)?.currentStreak ?? 0}
-          onEdit={onEditHabit}
-        />
+        <div
+          animate:flip={{ duration: 180 }}
+          in:fly={{ y: 8, duration: 170, easing: cubicOut }}
+          out:fade={{ duration: 100 }}
+        >
+          <HabitCard
+            {habit}
+            streak={perHabitMap.get(habit.id)?.currentStreak ?? 0}
+            onEdit={onEditHabit}
+          />
+        </div>
       {/each}
     </div>
   </div>

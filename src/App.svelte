@@ -165,16 +165,20 @@
     <Header onAddHabit={handleAddHabit} />
     <Navigation {activeView} routes={VIEW_ROUTES} onViewChange={navigateToView} />
 
-    <main class="flex-1">
-      {#if activeView === 'today'}
-        <HabitList onEditHabit={handleEditHabit} onAddHabit={handleAddHabit} />
-      {:else if activeView === 'calendar'}
-        <CalendarView onEditHabit={handleEditHabit} />
-      {:else if activeView === 'stats'}
-        <StatsView />
-      {:else if activeView === 'habits'}
-        <AllHabitsView onEditHabit={handleEditHabit} />
-      {/if}
+    <main class="flex-1 overflow-hidden">
+      {#key activeView}
+        <section class="view-panel">
+          {#if activeView === 'today'}
+            <HabitList onEditHabit={handleEditHabit} onAddHabit={handleAddHabit} />
+          {:else if activeView === 'calendar'}
+            <CalendarView onEditHabit={handleEditHabit} />
+          {:else if activeView === 'stats'}
+            <StatsView />
+          {:else if activeView === 'habits'}
+            <AllHabitsView onEditHabit={handleEditHabit} />
+          {/if}
+        </section>
+      {/key}
     </main>
   </div>
 

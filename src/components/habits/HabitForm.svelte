@@ -6,6 +6,8 @@
   import { CATEGORIES, COLORS, DAY_LABELS, EMOJIS } from '../../utils/constants'
   import { requestPermission } from '../../utils/notifications'
   import { untrack } from 'svelte'
+  import { cubicOut } from 'svelte/easing'
+  import { fade, fly } from 'svelte/transition'
 
   interface Props {
     open: boolean
@@ -194,7 +196,11 @@
       </div>
 
       {#if form.frequency === 'custom'}
-        <div class="flex flex-wrap gap-2">
+        <div
+          class="flex flex-wrap gap-2"
+          in:fly={{ y: -6, duration: 150, easing: cubicOut }}
+          out:fade={{ duration: 90 }}
+        >
           {#each DAY_LABELS as label, day (label)}
             <button
               type="button"
@@ -237,7 +243,11 @@
       </div>
 
       {#if form.reminderEnabled}
-        <div class="mt-3">
+        <div
+          class="mt-3"
+          in:fly={{ y: -6, duration: 150, easing: cubicOut }}
+          out:fade={{ duration: 90 }}
+        >
           <label
             for="reminder-time"
             class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300"

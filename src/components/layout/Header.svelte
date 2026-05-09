@@ -2,6 +2,7 @@
   import Button from '../ui/Button.svelte'
   import { habitStore, setTimeFormat, toggleTheme } from '../../stores/habitStore.svelte'
   import type { TimeFormat } from '../../types'
+  import { fade } from 'svelte/transition'
   import { Clock, Moon, Plus, Settings, Sun } from 'lucide-svelte'
 
   interface Props {
@@ -63,7 +64,8 @@
           onclick={() => (showSettings = false)}
         ></button>
         <div
-          class="absolute right-0 top-full z-50 mt-2 w-60 rounded-xl border border-gray-200 bg-white py-2 shadow-xl dark:border-slate-600 dark:bg-slate-700"
+          class="menu-panel absolute right-0 top-full z-50 mt-2 w-60 rounded-xl border border-gray-200 bg-white py-2 shadow-xl dark:border-slate-600 dark:bg-slate-700"
+          out:fade={{ duration: 80 }}
         >
           <div class="px-3 py-2">
             <p

@@ -6,6 +6,8 @@
   import { DAY_LABELS_SHORT } from '../../utils/constants'
   import { getCalendarDays, getDateKey } from '../../utils/date'
   import { addMonths, format, isSameDay, subMonths } from 'date-fns'
+  import { cubicOut } from 'svelte/easing'
+  import { fade, fly } from 'svelte/transition'
   import { ChevronLeft, ChevronRight } from 'lucide-svelte'
 
   interface Props {
@@ -71,21 +73,23 @@
     {/each}
   </div>
 
-  <div class="grid grid-cols-7 gap-1">
-    {#each calendarDays as date, index (date.toISOString())}
-      <DayCell
-        {date}
-        {currentMonth}
-        selected={selectedDate != null && isSameDay(date, selectedDate)}
-        onSelect={(nextDate) => (selectedDate = nextDate)}
-        completedCount={dayCellData[index].completedCount}
-        total={dayCellData[index].total}
-      />
-    {/each}
-  </div>
+  {#key `${currentMonth.getFullYear()}-${currentMonth.getMonth()}`}
+    <div class="grid grid-cols-7 gap-1" in:fade={{ duration: 150 }}>
+      {#each calendarDays as date, index (date.toISOString())}
+        <DayCell
+          {date}
+          {currentMonth}
+          selected={selectedDate != null && isSameDay(date, selectedDate)}
+          onSelect={(nextDate) => (selectedDate = nextDate)}
+          completedCount={dayCellData[index].completedCount}
+          total={dayCellData[index].total}
+        />
+      {/each}
+    </div>
+  {/key}
 
   {#if selectedDate}
-    <div class="mt-6">
+    <div class="mt-6" in:fly={{ y: 8, duration: 170, easing: cubicOut }} out:fade={{ duration: 100 }}>
       <h3 class="mb-3 text-sm font-medium text-gray-500 dark:text-slate-400">
         {format(selectedDate, 'EEEE, MMMM d')}
       </h3>

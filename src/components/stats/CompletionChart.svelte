@@ -64,7 +64,7 @@
           <div class={['flex w-full items-end', showLabelsAbove ? 'h-24' : 'h-28']}>
             <div
               class={[
-                'w-full transition-all duration-500',
+                'chart-bar w-full transition-all duration-500',
                 compact ? 'rounded-sm' : 'rounded-lg',
                 height === 100
                   ? 'bg-green-500'
@@ -72,7 +72,7 @@
                     ? 'bg-indigo-500'
                     : 'bg-gray-200 dark:bg-slate-700',
               ]}
-              style={`height: ${Math.max(height, 4)}%`}
+              style={`height: ${Math.max(height, 4)}%; --bar-delay: ${Math.min(index * 12, 180)}ms`}
               title={`${point.completed}/${point.total}`}
             ></div>
           </div>
