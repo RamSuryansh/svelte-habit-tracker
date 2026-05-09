@@ -165,7 +165,7 @@
     <Header onAddHabit={handleAddHabit} />
     <Navigation {activeView} routes={VIEW_ROUTES} onViewChange={navigateToView} />
 
-    <main class="flex-1 overflow-hidden">
+    <main class="flex-1">
       {#key activeView}
         <section class="view-panel">
           {#if activeView === 'today'}
